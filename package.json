@@ -1,0 +1,19 @@
+{
+  "name": "wtwr",
+  "version": "1.0.0",
+  "description": "The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bombingrun3/se_project_express.git"
+  },
+  "author": "Ryan Bommarito",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bombingrun3/se_project_express/issues"
+  },
+  "homepage": "https://github.com/Bombingrun3/se_project_express#readme"
+}
