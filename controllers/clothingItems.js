@@ -12,7 +12,8 @@ const getClothingItems = (req, res) => {
 
 // Create a new Item
 const createClothingItem = (req, res) => {
-  const { name, weather, imageUrl, owner } = req.body;
+  const { name, weather, imageUrl } = req.body;
+  const owner = req.user._id;
 
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => res.send(item))
@@ -31,8 +32,24 @@ const createClothingItem = (req, res) => {
 
 // Delete an Item
 const deleteClothingItem = (req, res) => {
-  console.log("Deleted Item");
+  const { itemId } = req.params;
+
+  ClothingItem.findByIdAndDelete(itemId)
+    .then((item) => {
+      if (item === null) {
+        return res.status(404).send({ message: "Item Not Found" });
+      }
+      return res.send(item);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(500)
+        .send({ message: "An error has occurred on the server" });
+    });
 };
+
+// 6814f01e5096f2a6c056b57a
 
 module.exports = {
   getClothingItems,

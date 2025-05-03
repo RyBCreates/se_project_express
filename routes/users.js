@@ -6,7 +6,6 @@ router.get("/:userId", getUser);
 router.post(
   "/",
   (req, res, next) => {
-    console.log("Route handler reached - POST /api/users");
     next();
   },
   createUser
