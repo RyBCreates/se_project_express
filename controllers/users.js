@@ -42,6 +42,14 @@ const getUser = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
+  if (!name || !avatar) {
+    return res.status(BAD_REQUEST).send({
+      message: `Missing required fields: ${!name ? "name" : ""} ${
+        !avatar ? "avatar" : ""
+      }`.trim(),
+    });
+  }
+
   User.create({ name, avatar })
     .then((user) => res.send(user))
     .catch((err) => {

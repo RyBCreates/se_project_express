@@ -1,6 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
+const mongoose = require("mongoose");
 const {
   BAD_REQUEST,
+  UNAUTHORIZED,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
@@ -26,6 +28,11 @@ const createClothingItem = (req, res) => {
     .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
+      if (!req.user) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Authorization required" });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST)
@@ -41,7 +48,41 @@ const createClothingItem = (req, res) => {
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid item ID format" });
+  }
+
+  ClothingItem.findById(itemId)
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
+    .then((item) => {
+      if (item.owner.toString() !== req.user._id.toString()) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "You are not authorized to delete this item" });
+      }
+      return item.deleteOne().then(() => {
+        res.send(item);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({
+        message: err.message || "An error has occurred on the server",
+      });
+    });
+};
+
+// Like an Item
+const likeClothingItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
@@ -52,30 +93,59 @@ const deleteClothingItem = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (!req.user) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Authorization required" });
+      }
+      if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid item ID format" });
+      }
       return res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({
         message: err.message || "An error has occurred on the server",
       });
     });
 };
 
-const likeItem = (req, res) =>
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  );
-
-const dislikeItem = (req, res) =>
+// Dislike an Item
+const dislikeClothingItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
-  );
+  )
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
+    .then((item) => {
+      res.send(item);
+    })
+    .catch((err) => {
+      console.error(err);
+      if (!req.user) {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Authorization required" });
+      }
+      if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid item ID format" });
+      }
+      return res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({
+        message: err.message || "An error has occurred on the server",
+      });
+    });
+};
 
 module.exports = {
   getClothingItems,
   createClothingItem,
   deleteClothingItem,
-  likeItem,
-  dislikeItem,
+  likeClothingItem,
+  dislikeClothingItem,
 };
