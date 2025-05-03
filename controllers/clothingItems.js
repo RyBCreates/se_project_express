@@ -1,4 +1,9 @@
 const ClothingItem = require("../models/clothingItem");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} = require("../utils/errors");
 
 // Get all clothingItems
 const getClothingItems = (req, res) => {
@@ -6,7 +11,9 @@ const getClothingItems = (req, res) => {
     .then((clothingItems) => res.send(clothingItems))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "An error has occurred on the server" });
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -21,11 +28,11 @@ const createClothingItem = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "Invalid data passed to create clothing item" });
       }
       return res
-        .status(500)
+        .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -35,24 +42,40 @@ const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
     .then((item) => {
-      if (item === null) {
-        return res.status(404).send({ message: "Item Not Found" });
-      }
-      return res.send(item);
+      res.send(item);
     })
     .catch((err) => {
       console.error(err);
-      return res
-        .status(500)
-        .send({ message: "An error has occurred on the server" });
+      return res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({
+        message: err.message || "An error has occurred on the server",
+      });
     });
 };
 
-// 6814f01e5096f2a6c056b57a
+const likeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  );
+
+const dislikeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  );
 
 module.exports = {
   getClothingItems,
   createClothingItem,
   deleteClothingItem,
+  likeItem,
+  dislikeItem,
 };

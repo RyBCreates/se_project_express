@@ -1,4 +1,9 @@
 const User = require("../models/user");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} = require("../utils/errors");
 
 // Get all users
 const getUsers = (req, res) => {
@@ -6,7 +11,9 @@ const getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "An error has occurred on the server" });
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -20,13 +27,13 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid user ID" });
+        return res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "User not found" });
+        return res.status(NOT_FOUND).send({ message: "User not found" });
       }
       return res
-        .status(500)
+        .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
 };
@@ -41,11 +48,11 @@ const createUser = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "Invalid data passed to create user" });
       }
       return res
-        .status(500)
+        .status(INTERNAL_SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
 };
