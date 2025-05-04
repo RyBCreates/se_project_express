@@ -50,7 +50,7 @@ const createUser = (req, res) => {
     });
   }
 
-  User.create({ name, avatar })
+  return User.create({ name, avatar })
     .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);

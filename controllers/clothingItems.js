@@ -27,7 +27,7 @@ const createClothingItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
-  ClothingItem.create({ name, weather, imageUrl, owner })
+  return ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
@@ -51,7 +51,7 @@ const deleteClothingItem = (req, res) => {
     return res.status(BAD_REQUEST).send({ message: "Invalid item ID format" });
   }
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
@@ -81,7 +81,7 @@ const likeClothingItem = (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
     return res.status(BAD_REQUEST).send({ message: "Invalid item ID format" });
   }
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
