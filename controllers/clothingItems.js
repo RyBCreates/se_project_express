@@ -28,9 +28,7 @@ const createClothingItem = (req, res) => {
   const owner = req.user._id;
 
   ClothingItem.create({ name, weather, imageUrl, owner })
-    .then((item) => {
-      return res.send(item);
-    })
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
 
@@ -65,9 +63,7 @@ const deleteClothingItem = (req, res) => {
           .status(UNAUTHORIZED)
           .send({ message: "You are not authorized to delete this item" });
       }
-      return item.deleteOne().then(() => {
-        return res.send(item);
-      });
+      return item.deleteOne().then(() => res.send(item));
     })
     .catch((err) => {
       console.error(err);
@@ -95,9 +91,7 @@ const likeClothingItem = (req, res) => {
       error.statusCode = NOT_FOUND;
       throw error;
     })
-    .then((item) => {
-      return res.send(item);
-    })
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
 
@@ -120,7 +114,7 @@ const dislikeClothingItem = (req, res) => {
       throw error;
     })
     .then((item) => {
-      return res.send(item);
+      res.send(item);
     })
     .catch((err) => {
       console.error(err);
