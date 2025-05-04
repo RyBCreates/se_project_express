@@ -65,7 +65,7 @@ const deleteClothingItem = (req, res) => {
           .send({ message: "You are not authorized to delete this item" });
       }
       return item.deleteOne().then(() => {
-        res.send(item);
+        return res.send(item);
       });
     })
     .catch((err) => {
