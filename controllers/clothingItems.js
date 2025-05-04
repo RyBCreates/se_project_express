@@ -21,18 +21,19 @@ const getClothingItems = (req, res) => {
 
 // Create a new Item
 const createClothingItem = (req, res) => {
+  if (!req.user) {
+    return res.status(UNAUTHORIZED).send({ message: "Authorization required" });
+  }
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
   ClothingItem.create({ name, weather, imageUrl, owner })
-    .then((item) => res.send(item))
+    .then((item) => {
+      return res.send(item);
+    })
     .catch((err) => {
       console.error(err);
-      if (!req.user) {
-        return res
-          .status(UNAUTHORIZED)
-          .send({ message: "Authorization required" });
-      }
+
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST)
@@ -78,6 +79,12 @@ const deleteClothingItem = (req, res) => {
 
 // Like an Item
 const likeClothingItem = (req, res) => {
+  if (!req.user) {
+    return res.status(UNAUTHORIZED).send({ message: "Authorization required" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid item ID format" });
+  }
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
@@ -89,20 +96,11 @@ const likeClothingItem = (req, res) => {
       throw error;
     })
     .then((item) => {
-      res.send(item);
+      return res.send(item);
     })
     .catch((err) => {
       console.error(err);
-      if (!req.user) {
-        return res
-          .status(UNAUTHORIZED)
-          .send({ message: "Authorization required" });
-      }
-      if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid item ID format" });
-      }
+
       return res.status(err.statusCode || INTERNAL_SERVER_ERROR).send({
         message: err.message || "An error has occurred on the server",
       });
@@ -122,7 +120,7 @@ const dislikeClothingItem = (req, res) => {
       throw error;
     })
     .then((item) => {
-      res.send(item);
+      return res.send(item);
     })
     .catch((err) => {
       console.error(err);
