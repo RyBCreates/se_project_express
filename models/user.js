@@ -8,6 +8,17 @@ const userSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 30,
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator(value) {
+        return validator.isEmail(value);
+      },
+    },
+  },
+  password: { type: String, required: true, select: false },
   avatar: {
     type: String,
     required: true,
