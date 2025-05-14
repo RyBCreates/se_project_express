@@ -3,6 +3,7 @@ const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
   UNAUTHORIZED,
+  FORBIDDEN,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
@@ -60,7 +61,7 @@ const deleteClothingItem = (req, res) => {
     .then((item) => {
       if (item.owner.toString() !== req.user._id.toString()) {
         return res
-          .status(UNAUTHORIZED)
+          .status(FORBIDDEN)
           .send({ message: "You are not authorized to delete this item" });
       }
       return item.deleteOne().then(() => res.send(item));
