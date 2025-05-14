@@ -13,7 +13,7 @@ const {
 
 // Get all users
 const getUsers = (req, res) => {
-  return User.find({})
+  User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
@@ -66,10 +66,9 @@ const createUser = (req, res) => {
         password: hash,
       })
     )
-    .then((data) => {
-      const user = data.toObject();
-      delete user.password;
-      res.send(user);
+    .then((user) => {
+      const { password: removed, ...userWithoutPassword } = user.toObject();
+      res.send(userWithoutPassword);
     })
     .catch((err) => {
       console.error(err);
@@ -127,7 +126,7 @@ const updateCurrentUser = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND).send({ message: "User not found" });
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
