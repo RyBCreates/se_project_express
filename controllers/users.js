@@ -13,7 +13,7 @@ const {
 
 // Get all users
 const getUsers = (req, res) => {
-  User.find({})
+  return User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
@@ -27,7 +27,7 @@ const getUsers = (req, res) => {
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
-  User.findById(userId)
+  return User.findById(userId)
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
@@ -97,7 +97,7 @@ const loginUser = (req, res) => {
     });
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((data) => {
       const token = jwt.sign({ _id: data._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -118,7 +118,7 @@ const updateCurrentUser = (req, res) => {
   const { avatar, name } = req.body;
   const userId = req.user._id;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { avatar, name },
     { new: true, runValidators: true }
