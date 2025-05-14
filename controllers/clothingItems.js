@@ -22,9 +22,6 @@ const getClothingItems = (req, res) => {
 
 // Create a new Item
 const createClothingItem = (req, res) => {
-  if (!req.user) {
-    return res.status(UNAUTHORIZED).send({ message: "Authorization required" });
-  }
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -76,9 +73,6 @@ const deleteClothingItem = (req, res) => {
 
 // Like an Item
 const likeClothingItem = (req, res) => {
-  if (!req.user) {
-    return res.status(UNAUTHORIZED).send({ message: "Authorization required" });
-  }
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
     return res.status(BAD_REQUEST).send({ message: "Invalid item ID format" });
   }

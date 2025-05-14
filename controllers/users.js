@@ -11,18 +11,6 @@ const {
   UNAUTHORIZED,
 } = require("../utils/errors");
 
-// Get all users
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.error(err);
-      res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
-
 // Get user by ID
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
@@ -103,13 +91,18 @@ const loginUser = (req, res) => {
       });
       const user = data.toObject();
       delete user.password;
-      res.send({ user, token });
+      return res.send({ user, token });
     })
     .catch((err) => {
       console.error(err);
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
       return res
-        .status(UNAUTHORIZED)
-        .send({ message: "Incorrect email or password" });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -141,7 +134,6 @@ const updateCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   getCurrentUser,
   createUser,
   loginUser,
