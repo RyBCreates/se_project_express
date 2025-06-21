@@ -4,11 +4,11 @@ const { JWT_SECRET } = require("../utils/config");
 
 const User = require("../models/user");
 const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-  CONFLICT,
-  UNAUTHORIZED,
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+  ConflictError,
+  InternalServerError,
 } = require("../utils/errors");
 
 // Get user by ID
@@ -21,21 +21,14 @@ const getCurrentUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return next({ statusCode: BAD_REQUEST, message: "Invalid user ID" });
-        // res.status(BAD_REQUEST).send({ message: "Invalid user ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return next({ statusCode: NOT_FOUND, message: "User not found" });
-
-        // res.status(NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
-      return next({
-        statusCode: INTERNAL_SERVER_ERROR,
-        message: "An error has occurred on the server",
-      });
-      // res
-      //   .status(INTERNAL_SERVER_ERROR)
-      //   .send({ message: "An error has occurred on the server" });
+      return next(
+        new InternalServerError("An error has occurred on the server")
+      );
     });
 };
 
@@ -44,16 +37,13 @@ const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!name || !avatar || !email || !password) {
-    return next({
-      statusCode: BAD_REQUEST,
-      message: `Missing required fields: ${!name ? "name" : ""} ${
-        !avatar ? "avatar" : ""
-      } ${!email ? "email" : ""} ${!password ? "password" : ""}`.trim(),
-    });
-    // res.status(BAD_REQUEST).send({
-    //   message: `Missing required fields: ${!name ? "name" : ""} ${
-    //     !avatar ? "avatar" : ""
-    //   } ${!email ? "email" : ""} ${!password ? "password" : ""}`.trim(),
+    return next(
+      new BadRequestError(
+        `Missing required fields: ${!name ? "name" : ""} ${
+          !avatar ? "avatar" : ""
+        } ${!email ? "email" : ""} ${!password ? "password" : ""}`.trim()
+      )
+    );
   }
 
   return bcrypt
@@ -73,26 +63,15 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return next({
-          statusCode: BAD_REQUEST,
-          message: "Invalid data passed to create user",
-        });
-        // return res
-        //   .status(BAD_REQUEST)
-        //   .send({ message: "Invalid data passed to create user" });
+        return next(new BadRequestError("Invalid data passed to create user"));
       }
       if (err.code === 11000) {
-        return next({ statusCode: CONFLICT, message: "Email already exists" });
-        // return res.status(CONFLICT).send({ message: "Email already exists" });
+        return next(new ConflictError("Email already exists"));
       }
 
-      return next({
-        statusCode: INTERNAL_SERVER_ERROR,
-        message: "An error has occurred on the server",
-      });
-      // return res
-      //   .status(INTERNAL_SERVER_ERROR)
-      //   .send({ message: "An error has occurred on the server" });
+      return next(
+        new InternalServerError("An error has occurred on the server")
+      );
     });
 };
 
@@ -101,13 +80,7 @@ const loginUser = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next({
-      statusCode: BAD_REQUEST,
-      message: "Both email and password are required",
-    });
-    //  res.status(BAD_REQUEST).send({
-    //   message: "Both email and password are required",
-    // });
+    return next(new BadRequestError("Both email and password are required"));
   }
 
   return User.findUserByCredentials(email, password)
@@ -122,23 +95,10 @@ const loginUser = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
-        return next({
-          statusCode: UNAUTHORIZED,
-          message: "Incorrect email or password",
-        });
-
-        // return res
-        //   .status(UNAUTHORIZED)
-        //   .send({ message: "Incorrect email or password" });
+        return next(new UnauthorizedError("Incorrect email or password"));
       }
 
-      return next({
-        statusCode: INTERNAL_SERVER_ERROR,
-        message: "An error occurred on the server",
-      });
-      //   return res
-      //     .status(INTERNAL_SERVER_ERROR)
-      //     .send({ message: "An error occurred on the server" });
+      return next(new InternalServerError("An error occurred on the server"));
     });
 };
 
@@ -153,29 +113,18 @@ const updateCurrentUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        return next({ statusCode: NOT_FOUND, message: "User not found" });
-        // return res.status(NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return next({
-          statusCode: BAD_REQUEST,
-          message: "Invalid data passed to update user",
-        });
-        // return res
-        //   .status(BAD_REQUEST)
-        //   .send({ message: "Invalid data passed to update user" });
+        return next(new BadRequestError("Invalid data passed to the user"));
       }
 
-      return next({
-        statusCode: INTERNAL_SERVER_ERROR,
-        message: "An error occurred on the server",
-      });
-      // return res
-      //   .status(INTERNAL_SERVER_ERROR)
-      //   .send({ message: "An error occurred on the server" });
+      return next(
+        new InternalServerError("An error has occurred on the server")
+      );
     });
 };
 
