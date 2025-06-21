@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
+const { errors } = require("celebrate");
 const errorHandler = require("./middlewares/errorHandler");
 const { loginUser, createUser } = require("./controllers/users");
 
@@ -16,6 +17,8 @@ app.post("/signup", createUser);
 app.post("/signin", loginUser);
 
 app.use("/", mainRouter);
+
+app.use(errors());
 
 app.use(errorHandler);
 
