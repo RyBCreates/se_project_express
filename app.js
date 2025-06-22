@@ -6,6 +6,10 @@ const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/errorHandler");
 const { loginUser, createUser } = require("./controllers/users");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+const {
+  validateUserSignup,
+  validateUserLogin,
+} = require("./middlewares/validation");
 
 const app = express();
 
@@ -16,8 +20,8 @@ app.use(requestLogger);
 app.use(express.json());
 app.use(cors());
 
-app.post("/signup", createUser);
-app.post("/signin", loginUser);
+app.post("/signup", validateUserSignup, createUser);
+app.post("/signin", validateUserLogin, loginUser);
 
 app.use("/", mainRouter);
 
