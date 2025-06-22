@@ -3,7 +3,6 @@ const ClothingItem = require("../models/clothingItem");
 const {
   BadRequestError,
   NotFoundError,
-  UnauthorizedError,
   InternalServerError,
   ForbiddenError,
 } = require("../utils/errors/errors");
@@ -27,7 +26,6 @@ const createClothingItem = (req, res, next) => {
     .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
-
       if (err.name === "ValidationError") {
         return next(
           new BadRequestError("Invalid data passed to create clothing item")
@@ -47,21 +45,21 @@ const deleteClothingItem = (req, res, next) => {
     return next(new BadRequestError("Invalid item ID format"));
   }
 
-  return ClothingItem.findById(itemId)
+  ClothingItem.findById(itemId)
     .orFail(() => {
-      const error = new NotFoundError("Item ID not found");
-      throw error;
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
       if (item.owner.toString() !== req.user._id.toString()) {
-        return next(
-          new ForbiddenError("You are not authorized to delete this item")
-        );
+        throw new ForbiddenError("You are not authorized to delete this item");
       }
       return item.deleteOne().then(() => res.send(item));
     })
     .catch((err) => {
       console.error(err);
+      if (err.statusCode) {
+        return next(err);
+      }
       return next(
         new InternalServerError("An error has occurred on the server")
       );
@@ -79,12 +77,14 @@ const likeClothingItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new NotFoundError("Item ID not found");
-      throw error;
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
+      if (err.statusCode) {
+        return next(err);
+      }
       return next(
         new InternalServerError("An error has occurred on the server")
       );
@@ -102,16 +102,15 @@ const dislikeClothingItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new NotFoundError("Item ID not found");
-      throw error;
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
       res.send(item);
     })
     .catch((err) => {
       console.error(err);
-      if (!req.user) {
-        return next(new UnauthorizedError("Authorization required"));
+      if (err.statusCode) {
+        return next(err);
       }
       return next(
         new InternalServerError("An error has occurred on the server")

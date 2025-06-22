@@ -69,7 +69,6 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new ConflictError("Email already exists"));
       }
-
       return next(
         new InternalServerError("An error has occurred on the server")
       );
