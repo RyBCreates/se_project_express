@@ -9,7 +9,7 @@ const {
   UnauthorizedError,
   ConflictError,
   InternalServerError,
-} = require("../utils/errors");
+} = require("../utils/errors/errors");
 
 // Get user by ID
 const getCurrentUser = (req, res, next) => {

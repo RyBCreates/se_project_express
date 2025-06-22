@@ -6,7 +6,7 @@ const {
   UnauthorizedError,
   InternalServerError,
   ForbiddenError,
-} = require("../utils/errors");
+} = require("../utils/errors/errors");
 
 // Get all clothingItems
 const getClothingItems = (req, res, next) => {
