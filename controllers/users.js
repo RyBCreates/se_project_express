@@ -57,7 +57,8 @@ const createUser = (req, res, next) => {
       })
     )
     .then((user) => {
-      const { password: _removed, ...userWithoutPassword } = user.toObject();
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
       res.send(userWithoutPassword);
     })
     .catch((err) => {
