@@ -9,7 +9,7 @@ const {
 
 // Get all clothingItems
 const getClothingItems = (req, res, next) => {
-  ClothingItem.find({})
+  return ClothingItem.find({})
     .then((clothingItems) => res.send(clothingItems))
     .catch((err) => {
       console.error(err);
@@ -45,7 +45,7 @@ const deleteClothingItem = (req, res, next) => {
     return next(new BadRequestError("Invalid item ID format"));
   }
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .orFail(() => {
       throw new NotFoundError("Item ID not found");
     })
