@@ -16,18 +16,17 @@ const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   return User.findById(userId)
-    .orFail()
+    .orFail(() => new NotFoundError("User not found"))
     .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID"));
       }
-      if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("User not found"));
-      }
       return next(
-        new InternalServerError("An error has occurred on the server")
+        err.statusCode
+          ? err
+          : new InternalServerError("An error has occurred on the server")
       );
     });
 };
@@ -59,15 +58,15 @@ const createUser = (req, res, next) => {
     .then((user) => {
       const userWithoutPassword = user.toObject();
       delete userWithoutPassword.password;
-      res.send(userWithoutPassword);
+      res.status(201).send(userWithoutPassword);
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === "ValidationError") {
-        return next(new BadRequestError("Invalid data passed to create user"));
-      }
       if (err.code === 11000) {
         return next(new ConflictError("Email already exists"));
+      }
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError("Invalid data passed to create user"));
       }
       return next(
         new InternalServerError("An error has occurred on the server")
@@ -97,7 +96,6 @@ const loginUser = (req, res, next) => {
       if (err.message === "Incorrect email or password") {
         return next(new UnauthorizedError("Incorrect email or password"));
       }
-
       return next(new InternalServerError("An error occurred on the server"));
     });
 };
@@ -111,20 +109,17 @@ const updateCurrentUser = (req, res, next) => {
     { avatar, name },
     { new: true, runValidators: true }
   )
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError("User not found"));
-      }
-      return res.send(user);
-    })
+    .orFail(() => new NotFoundError("User not found"))
+    .then((user) => res.send(user))
     .catch((err) => {
+      console.error(err);
       if (err.name === "ValidationError") {
-        return next(new BadRequestError("Invalid data passed to the user"));
+        return next(new BadRequestError("Invalid data passed for update"));
       }
-
-      return next(
-        new InternalServerError("An error has occurred on the server")
-      );
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid user ID format"));
+      }
+      return next(new InternalServerError("An error occurred on the server"));
     });
 };
 
