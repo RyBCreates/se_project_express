@@ -1,6 +1,7 @@
 const { Joi, celebrate } = require("celebrate");
 const validator = require("validator");
 
+// Custom URL validator
 const validateURL = (value, helpers) => {
   if (validator.isURL(value)) {
     return value;
@@ -8,8 +9,8 @@ const validateURL = (value, helpers) => {
   return helpers.error("string.uri");
 };
 
-// When an Item is created
-const clothingItem = celebrate({
+// Validate creating a clothing item
+const validateCreateClothingItem = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
@@ -18,13 +19,13 @@ const clothingItem = celebrate({
     }),
     imageUrl: Joi.string().required().custom(validateURL).messages({
       "string.empty": 'The "imageUrl" field must be filled in',
-      "string.uri": 'the "imageUrl" field must be a valid url',
+      "string.uri": 'The "imageUrl" field must be a valid URL',
     }),
   }),
 });
 
-// When a User is created
-const userInfo = celebrate({
+// Validate user signup
+const validateUserSignup = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
       "string.min": 'The minimum length of the "name" field is 2',
@@ -33,7 +34,7 @@ const userInfo = celebrate({
     }),
     avatar: Joi.string().required().custom(validateURL).messages({
       "string.empty": 'The "avatar" field must be filled in',
-      "string.uri": 'the "avatar" field must be a valid url',
+      "string.uri": 'The "avatar" field must be a valid URL',
     }),
     email: Joi.string().required().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -44,8 +45,8 @@ const userInfo = celebrate({
   }),
 });
 
-// When a User logs in
-const userAuth = celebrate({
+// Validate user login
+const validateUserLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email().messages({
       "string.empty": 'The "email" field must be filled in',
@@ -56,7 +57,8 @@ const userAuth = celebrate({
   }),
 });
 
-const itemId = celebrate({
+// Validate item ID in route params
+const validateItemId = celebrate({
   params: Joi.object().keys({
     itemId: Joi.string().hex().length(24).messages({
       "string.hex": "Item ID is not the correct format",
@@ -65,4 +67,9 @@ const itemId = celebrate({
   }),
 });
 
-module.exports = { clothingItem, userInfo, userAuth, itemId };
+module.exports = {
+  validateCreateClothingItem,
+  validateUserSignup,
+  validateUserLogin,
+  validateItemId,
+};
