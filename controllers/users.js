@@ -16,7 +16,9 @@ const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   return User.findById(userId)
-    .orFail(() => new NotFoundError("User not found"))
+    .orFail(() => {
+      throw new NotFoundError("User not found");
+    })
     .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);
@@ -109,7 +111,9 @@ const updateCurrentUser = (req, res, next) => {
     { avatar, name },
     { new: true, runValidators: true }
   )
-    .orFail(() => new NotFoundError("User not found"))
+    .orFail(() => {
+      throw new NotFoundError("User not found");
+    })
     .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);

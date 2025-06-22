@@ -47,7 +47,7 @@ const deleteClothingItem = (req, res, next) => {
 
   return ClothingItem.findById(itemId)
     .orFail(() => {
-      new NotFoundError("Item ID not found");
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
       if (item.owner.toString() !== req.user._id.toString()) {
@@ -77,7 +77,7 @@ const likeClothingItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      new NotFoundError("Item ID not found");
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => res.send(item))
     .catch((err) => {
@@ -102,7 +102,7 @@ const dislikeClothingItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      new NotFoundError("Item ID not found");
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => {
       res.send(item);
