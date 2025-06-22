@@ -8,7 +8,7 @@ const validateURL = (value, helpers) => {
   return helpers.error("string.uri");
 };
 
-//When an Item is created
+// When an Item is created
 const clothingItem = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
@@ -58,13 +58,10 @@ const userAuth = celebrate({
 
 const itemId = celebrate({
   params: Joi.object().keys({
-    itemId: Joi.string()
-      .hex()
-      .length(24)
-      .messages({
-        "string.hex": "Item ID is not the correct format",
-        "string.length": "Item ID is not the correct format",
-      }),
+    itemId: Joi.string().hex().length(24).messages({
+      "string.hex": "Item ID is not the correct format",
+      "string.length": "Item ID is not the correct format",
+    }),
   }),
 });
 
