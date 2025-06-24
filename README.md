@@ -29,7 +29,9 @@ Users can add as many of their own custom cards to their profile as they would l
 
 ## `!!!WEBSITE LINK!!!`
 
-Check back here in future iterations once Front End is linked to the Back End.
+[Frontend Link](www.wtwr.medialoverz.com)
+
+[Backend Link](api.wtwr.medialoverz.com)
 
 ## Future Goals
 
